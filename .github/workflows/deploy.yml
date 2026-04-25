@@ -6,7 +6,6 @@ on:
     types:
       - completed
     branches: [main]
-
   push:
     branches: [main]
     paths:
@@ -18,7 +17,7 @@ on:
       - 'requirements.txt'
       - 'docker-compose.yml'
 
-# 🔴 REQUIRED for release creation (fixes your 403 error)
+# REQUIRED for release creation (fixes your 403 error)
 permissions:
   contents: write
 
@@ -28,76 +27,37 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v4
-
-      - name: Build staging image
-        run: docker build -t $IMAGE_NAME:staging .
+      
+      - name: Print Environment Variables
+        run: env
+        
+      - name: Build and Run Docker Image (Staging)
         run: |
-          docker build -t $IMAGE_NAME:staging .
-
-      - name: Run staging container
-        run: |
-          docker run -d -p 5000:5000 --name staging-app $IMAGE_NAME:staging
-          sleep 5
-          echo "Staging container started successfully"
-
-      - name: Print environment variables
-        run: |
-          echo "STAGING DEPLOYMENT"
-          echo "IMAGE: $IMAGE_NAME:staging"
-          echo "STATUS: SUCCESS"
-
-      - name: Write Job Summary
-        run: |
-          echo "## 🚀 Staging Deployment Successful" >> $GITHUB_STEP_SUMMARY
-          echo "- Image: $IMAGE_NAME:staging" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
-      - name: Staging Job Summary
-        run: |
-          echo "## 🚀 Staging Deployment Successful" >> $GITHUB_STEP_SUMMARY
-          echo "- Image: $IMAGE_NAME:staging" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
-
-      - name: Staging Notification
-        run: |
-          echo "Slack notification: Deployment to staging successful"
+          docker build -t sakila-app:staging .
+          docker run -d --name staging-container -p 5000:5000 sakila-app:staging
+          
+      - name: Simulated Notification
+        run: echo "Slack notification: Deployment to staging successful"
+        
+      - name: Output Job Summary
+        run: echo "### Staging Deployment Completed :rocket:" >> $GITHUB_STEP_SUMMARY
 
   deploy-production:
     runs-on: ubuntu-latest
-    environment: production   # 👈 triggers manual approval if set in GitHub UI
+    needs: [deploy-staging]
     environment: production
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Build production image
-        run: docker build -t $IMAGE_NAME:latest .
-        run: |
-          docker build -t $IMAGE_NAME:latest .
-
-      - name: Production deployment
-        run: |
-          echo "Deploying to PRODUCTION..."
-          echo "IMAGE: $IMAGE_NAME:latest"
-          echo "SUCCESS"
-
-      # ✅ FIXED RELEASE STEP (NO gh CLI needed → avoids permission + missing setup issues)
+      
+      - name: Simulated Production Deployment
+        run: echo "Initiating deployment to production servers... Success!"
+        
+      - name: Simulated Notification
+        run: echo "Slack notification: Deployment to production successful"
+        
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
-          body: "Automated production deployment"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          echo "PRODUCTION DEPLOYMENT SUCCESSFUL"
-
-      # ✅ FIXED RELEASE STEP (NO gh CLI needed → avoids permission + missing setup issues)
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Production Job Summary
         run: |
-          TAG_NAME="v$(date +'%Y.%m.%d')"
+          TAG_NAME="v$(date +'%Y.%m.%d-%H%M%S')"
           gh release create $TAG_NAME --title "Release $TAG_NAME" --notes "Automated production deployment"

@@ -30,3 +30,4 @@ class Config:
 # Final deployment trigger
 # Final deployment trigger
 # Final deployment trigger
+# Clean restart trigger for deployment
