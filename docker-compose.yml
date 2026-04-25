@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
+    container_name: sakila-db
     volumes:
       - sakila-db-data:/var/lib/mysql
     networks:
@@ -25,6 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: sakila-app
     depends_on:
       db:
         condition: service_healthy
@@ -32,21 +32,23 @@ services:
       - "5000:5000"
     environment:
       MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DB: ${MYSQL_DATABASE}
     networks:
       - sakila-network
-    restart: on-failure
-    deploy:
-      restart_policy:
-        max_attempts: 5
+    restart: on-failure:5   
 
   db-admin:
     image: adminer:latest
+    container_name: sakila-adminer
     ports:
       - "8080:8080"
     depends_on:
       - db
     networks:
       - sakila-network
+    restart: unless-stopped
 
   test-runner:
     build:
@@ -60,6 +62,7 @@ services:
       - sakila-network
     profiles:
       - test
+    restart: "no"
 
 networks:
   sakila-network:
