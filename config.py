@@ -28,8 +28,13 @@ class Config:
 # Date: 2026-04-23
 # Purpose: Health check configuration merged from feature/add-healthcheck
 
-
+# Author: Hassan Aslam - Date: 2026-04-25
+# Purpose: Sets MySQL host and connection timeout configuration.
+#Team Member = Hassan  Date: 2026-04-25
 import os
+MYSQL_HOST = 'db-primary'
+HEALTH_CHECK_INTERVAL = int(os.environ.get('HEALTH_CHECK_INTERVAL', '10'))
+
 
 MYSQL_HOST = os.environ.get('MYSQL_HOST', 'sakila-db-server')
 MYSQL_USER = os.environ.get('MYSQL_USER', 'root')
@@ -45,3 +50,5 @@ try:
     HEALTH_CHECK_INTERVAL = int(os.environ.get('HEALTH_CHECK_INTERVAL', '10'))
 except ValueError:
     HEALTH_CHECK_INTERVAL = 10
+
+
