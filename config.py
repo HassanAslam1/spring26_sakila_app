@@ -27,3 +27,4 @@ class Config:
     MYSQL_DB = os.environ.get('MYSQL_DB', 'sakila')
 
 
+# Final deployment trigger
