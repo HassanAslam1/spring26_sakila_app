@@ -5,6 +5,7 @@ on:
     workflows: ["CI Pipeline"]
     types:
       - completed
+
   push:
     branches: [main]
     paths:
@@ -19,6 +20,10 @@ on:
 env:
   IMAGE_NAME: sakila-app
 
+# 🔴 REQUIRED for release creation (fixes your 403 error)
+permissions:
+  contents: write
+
 jobs:
   deploy-staging:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -28,6 +33,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build staging image
+        run: docker build -t $IMAGE_NAME:staging .
         run: |
           docker build -t $IMAGE_NAME:staging .
 
@@ -43,6 +49,11 @@ jobs:
           echo "IMAGE: $IMAGE_NAME:staging"
           echo "STATUS: SUCCESS"
 
+      - name: Write Job Summary
+        run: |
+          echo "## 🚀 Staging Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: $IMAGE_NAME:staging" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: Success" >> $GITHUB_STEP_SUMMARY
       - name: Staging Job Summary
         run: |
           echo "## 🚀 Staging Deployment Successful" >> $GITHUB_STEP_SUMMARY
@@ -56,12 +67,14 @@ jobs:
   deploy-production:
     needs: deploy-staging
     runs-on: ubuntu-latest
+    environment: production   # 👈 triggers manual approval if set in GitHub UI
     environment: production
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Build production image
+        run: docker build -t $IMAGE_NAME:latest .
         run: |
           docker build -t $IMAGE_NAME:latest .
 
@@ -69,6 +82,17 @@ jobs:
         run: |
           echo "Deploying to PRODUCTION..."
           echo "IMAGE: $IMAGE_NAME:latest"
+          echo "SUCCESS"
+
+      # ✅ FIXED RELEASE STEP (NO gh CLI needed → avoids permission + missing setup issues)
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          body: "Automated production deployment"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           echo "PRODUCTION DEPLOYMENT SUCCESSFUL"
 
       - name: Create GitHub Release
