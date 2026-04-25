@@ -18,7 +18,7 @@
 import os
 
 class Config:
-    MYSQL_HOST = 'sakila-db-server'
+    MYSQL_HOST = "sakila-db-server"
     CONNECTION_TIMEOUT = int(os.environ.get('CONNECTION_TIMEOUT', '30'))
     HEALTH_CHECK_INTERVAL = int(os.environ.get('HEALTH_CHECK_INTERVAL', '10'))
     MYSQL_HOST = 'mysql-container'
