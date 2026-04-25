@@ -17,20 +17,28 @@ on:
       - 'requirements.txt'
       - 'docker-compose.yml'
 
+# REQUIRED for release creation (fixes your 403 error)
+permissions:
+  contents: write
+
 jobs:
   deploy-staging:
     runs-on: ubuntu-latest
     environment: staging
     steps:
       - uses: actions/checkout@v4
+      
       - name: Print Environment Variables
         run: env
+        
       - name: Build and Run Docker Image (Staging)
         run: |
           docker build -t sakila-app:staging .
           docker run -d --name staging-container -p 5000:5000 sakila-app:staging
+          
       - name: Simulated Notification
-        run: echo "Slack notification Deployment to staging successful"
+        run: echo "Slack notification: Deployment to staging successful"
+        
       - name: Output Job Summary
         run: echo "### Staging Deployment Completed :rocket:" >> $GITHUB_STEP_SUMMARY
 
@@ -40,10 +48,13 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+      
       - name: Simulated Production Deployment
         run: echo "Initiating deployment to production servers... Success!"
+        
       - name: Simulated Notification
-        run: echo "Slack notification Deployment to production successful"
+        run: echo "Slack notification: Deployment to production successful"
+        
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
