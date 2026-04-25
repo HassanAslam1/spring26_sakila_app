@@ -67,6 +67,7 @@ jobs:
 
       # ✅ FIXED RELEASE STEP (NO gh CLI needed → avoids permission + missing setup issues)
       - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
