@@ -15,6 +15,7 @@
 # Author: Hassan Aslam - Date: 2026-04-25
 # Purpose: Sets MySQL host and connection timeout configuration.
 #Team Member = Hassan  Date: 2026-04-25
+#finalized
 import os
 
 class Config:
@@ -27,7 +28,3 @@ class Config:
     MYSQL_DB = os.environ.get('MYSQL_DB', 'sakila')
 
 
-# Final deployment trigger
-# Final deployment trigger
-# Final deployment trigger
-# Clean restart trigger for deployment
